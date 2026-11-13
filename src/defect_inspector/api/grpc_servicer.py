@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import grpc
 
+from defect_inspector.api.error_mapping import handle_grpc_errors
 from defect_inspector.generated import (
     defect_inspection_pb2,
     defect_inspection_pb2_grpc,
@@ -50,6 +51,7 @@ class DefectInspectionServicer(
             default_threshold=info.default_threshold,
         )
 
+    @handle_grpc_errors
     def InspectSurface(
         self,
         request: defect_inspection_pb2.InspectRequest,
