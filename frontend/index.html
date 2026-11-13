@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SteelSight M3 · Inspector Superficial de Acero NEU-DET (gRPC + ONNX)</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-workspace">Saltar al espacio de inspección</a>
+
+    <header class="topbar" role="banner">
+      <div class="topbar-brand">
+        <div class="brand-mark" aria-hidden="true">S9</div>
+        <div>
+          <p class="eyebrow">UAO · MAESTRÍA EN IA · COHORTE 2026-2S · GRUPO 9</p>
+          <h1>SteelSight M3 · Control de Calidad Siderúrgica</h1>
+        </div>
+      </div>
+
+      <div class="topbar-telemetry">
+        <div
+          id="health-badge"
+          class="health-pill health-unknown"
+          role="status"
+          aria-live="polite"
+        >
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span id="health-text">Verificando backend gRPC (:50051)…</span>
+        </div>
+
+        <label class="gateway-config" for="gateway-url">
+          <span>Gateway API</span>
+          <input
+            id="gateway-url"
+            type="url"
+            value="http://127.0.0.1:8000"
+            spellcheck="false"
+            aria-label="URL base del Gateway HTTP hacia gRPC"
+          />
+        </label>
+
+        <button
+          id="btn-refresh-health"
+          type="button"
+          class="btn btn-secondary"
+          title="Consultar nuevamente /health y /api/v1/model"
+        >
+          Refrescar /health
+        </button>
+      </div>
+    </header>
+
+    <div
+      id="sr-announcer"
+      class="sr-only"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+
+    <main id="main-workspace" class="workspace-grid">
+      <section class="panel control-panel" aria-labelledby="panel-input-title">
+        <div class="panel-header">
+          <h2 id="panel-input-title">1. Captura y Parámetros de Inspección</h2>
+          <span id="ui-state-pill" class="state-chip state-idle">IDLE</span>
+        </div>
+
+        <div
+          id="dropzone"
+          class="dropzone"
+          role="button"
+          tabindex="0"
+          aria-label="Zona para arrastrar o seleccionar imagen superficial PNG, JPEG, BMP o WEBP"
+        >
+          <input
+            id="file-input"
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/bmp"
+            hidden
+          />
+          <div class="dropzone-icon" aria-hidden="true">⬆️</div>
+          <p class="dropzone-title">Arrastra una imagen de bobina o haz clic para examinar</p>
+          <p class="dropzone-sub">PNG, JPG, BMP o WEBP · Máximo 10 MB · Inferencia CPU vía gRPC</p>
+        </div>
+
+        <div id="file-meta" class="file-meta hidden" aria-live="polite">
+          <strong id="file-name">—</strong>
+          <span id="file-details">—</span>
+        </div>
+
+        <div class="samples-section">
+          <div class="samples-header">
+            <h3>Muestras sintéticas locales (Canvas 2D)</h3>
+            <span>Genera archivo real y envía por red</span>
+          </div>
+          <div class="samples-grid" role="group" aria-label="Generadores rápidos de defectos">
+            <button type="button" class="btn btn-chip" data-sample="scratches">Rayadura (Scratches)</button>
+            <button type="button" class="btn btn-chip" data-sample="patches">Parches (Patches)</button>
+            <button type="button" class="btn btn-chip" data-sample="pitted_surface">Picaduras (Pitted)</button>
+            <button type="button" class="btn btn-chip" data-sample="inclusion">Inclusión (Inclusion)</button>
+            <button type="button" class="btn btn-chip" data-sample="crazing">Agrietamiento (Crazing)</button>
+            <button type="button" class="btn btn-chip" data-sample="rolled-in_scale">Cascarilla (Scale)</button>
+          </div>
+        </div>
+
+        <fieldset class="params-fieldset">
+          <legend>Política Operativa HITL &amp; Preprocesamiento</legend>
+
+          <div class="control-row">
+            <div class="control-label-row">
+              <label for="conf-threshold">Umbral de confianza HITL (conf_threshold)</label>
+              <output id="conf-threshold-value" for="conf-threshold">0.70</output>
+            </div>
+            <input
+              id="conf-threshold"
+              type="range"
+              min="0.10"
+              max="0.95"
+              step="0.01"
+              value="0.70"
+            />
+            <p class="help-text">
+              Si <code>confidence &lt; umbral</code>, el servidor marca
+              <strong>LOW_CONFIDENCE_REVIEW</strong> para revisión humana en planta.
+            </p>
+          </div>
+
+          <label class="toggle-row" for="apply-clahe">
+            <input id="apply-clahe" type="checkbox" checked />
+            <span>
+              <strong>Activar ecualización CLAHE</strong>
+              <small>Realza contraste local en lámina oscura o reflectante antes del tensor 224×224.</small>
+            </span>
+          </label>
+        </fieldset>
+
+        <div class="actions-row">
+          <button id="btn-inspect" type="button" class="btn btn-primary" disabled>
+            Ejecutar inspección gRPC
+          </button>
+          <button id="btn-reset" type="button" class="btn btn-ghost">Limpiar</button>
+        </div>
+
+        <div id="model-card-mini" class="model-mini" aria-live="polite">
+          <div><span>Modelo MaaS</span><strong id="meta-model-id">senanurcetin/neu-steel-defect-resnet18</strong></div>
+          <div><span>Revisión fija</span><code id="meta-model-rev">ad13c706</code></div>
+          <div><span>Licencia / Runtime</span><strong id="meta-runtime">MIT · ONNX CPU</strong></div>
+        </div>
+      </section>
+
+      <section class="panel results-panel" aria-labelledby="panel-output-title">
+        <div class="panel-header">
+          <h2 id="panel-output-title">2. Diagnóstico Superficial, Salience XAI y Confianza</h2>
+          <span id="transport-badge" class="transport-chip">HTTP :8000 → gRPC :50051</span>
+        </div>
+
+        <div id="error-banner" class="alert-error hidden" role="alert" aria-live="assertive">
+          <div>
+            <strong>Error de inspección:</strong>
+            <span id="error-message">—</span>
+          </div>
+          <button id="btn-retry" type="button" class="btn btn-danger-outline">Reintentar</button>
+        </div>
+
+        <div id="empty-state" class="empty-state">
+          <div class="empty-badge" aria-hidden="true">ONNX · ResNet-18 · 6 Clases NEU</div>
+          <h3>Sin captura inspeccionada en curso</h3>
+          <p>
+            Arrastra una imagen de superficie metálica o haz clic en uno de los 6 generadores
+            sintéticos para visualizar el mapa térmico Sobel XAI, ROI y puntajes calibrados.
+          </p>
+        </div>
+
+        <div id="loading-state" class="loading-state hidden" role="status" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <p>Ejecutando preprocesamiento e inferencia ONNX vía gRPC…</p>
+        </div>
+
+        <div id="success-state" class="success-state hidden">
+          <article id="verdict-card" class="verdict-card">
+            <div class="verdict-top">
+              <div>
+                <span id="hitl-badge" class="hitl-badge">—</span>
+                <h3 id="predicted-label">—</h3>
+                <p id="predicted-sub">Clase técnica: <code id="predicted-code">—</code></p>
+              </div>
+              <div class="confidence-box">
+                <span class="confidence-caption">Confianza Top-1</span>
+                <strong id="confidence-value">0.0%</strong>
+              </div>
+            </div>
+
+            <div class="telemetry-strip">
+              <div><span>Request ID</span><code id="res-request-id">—</code></div>
+              <div><span>Latencia gRPC</span><strong id="res-latency">—</strong></div>
+              <div><span>CLAHE</span><strong id="res-clahe">—</strong></div>
+              <div><span>Umbral</span><strong id="res-threshold">—</strong></div>
+              <div><span>ROI (224×224)</span><code id="res-roi">—</code></div>
+            </div>
+          </article>
+
+          <div class="visual-grid">
+            <figure class="visual-frame">
+              <figcaption>Imagen Original (entrada cliente)</figcaption>
+              <div class="frame-stage">
+                <img id="img-original" alt="Vista previa de superficie de acero original" />
+              </div>
+            </figure>
+
+            <figure class="visual-frame">
+              <figcaption>Overlay Térmico XAI (Sobel + ROI verde)</figcaption>
+              <div class="frame-stage">
+                <img id="img-overlay" alt="Mapa de saliencia XAI y región de interés detectada" />
+              </div>
+            </figure>
+          </div>
+
+          <section class="scores-section" aria-labelledby="scores-heading">
+            <div class="scores-header">
+              <h3 id="scores-heading">Distribución Softmax (6 Clases NEU-DET)</h3>
+              <span id="res-transport-label">HTTP-&gt;gRPC</span>
+            </div>
+            <div id="scores-bars" class="scores-bars"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <aside class="panel history-panel" aria-labelledby="history-heading">
+      <div class="panel-header">
+        <h2 id="history-heading">3. Bitácora Reciente de Sesión (últimas 8 inspecciones)</h2>
+        <span id="history-count" class="state-chip">0 registros</span>
+      </div>
+      <div class="table-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Archivo</th>
+              <th>Clase Predicha</th>
+              <th>Confianza</th>
+              <th>Decisión HITL</th>
+              <th>Latencia</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr class="history-empty-row">
+              <td colspan="7">Aún no se han ejecutado inspecciones en esta sesión.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </aside>
+
+    <footer class="footer">
+      <span>Arquitectura Desacoplada M3 · Cliente HTML5/ESM (:5173) → Gateway HTTP (:8000) → Servidor gRPC (:50051) · MLflow (:5050)</span>
+    </footer>
+
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>
