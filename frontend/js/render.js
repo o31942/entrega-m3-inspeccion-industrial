@@ -1,4 +1,4 @@
-/** Renderizador DOM seguro (sin innerHTML inseguro) para resultados, XAI e historial. */
+/** Renderizador DOM seguro con createElement/textContent para resultados, XAI e historial. */
 
 import { UI_STATES } from "./state.js";
 
