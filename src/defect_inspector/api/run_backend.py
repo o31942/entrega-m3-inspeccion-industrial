@@ -27,7 +27,8 @@ def main() -> None:
     )
     grpc_server.start()
 
-    target = f"{grpc_host}:{bound_port}"
+    connect_host = "127.0.0.1" if grpc_host == "0.0.0.0" else grpc_host
+    target = f"{connect_host}:{bound_port}"
     gateway_app = create_gateway_app(grpc_target=target)
 
     stop_event = threading.Event()
