@@ -23,13 +23,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY pyproject.toml uv.lock .python-version README.md LICENSE ./
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev --no-install-project
 
 COPY protos ./protos
 COPY scripts ./scripts
 COPY src ./src
 
-RUN uv run --no-sync python scripts/descargar_modelo.py \
+RUN uv sync --frozen --no-dev \
+    && uv run --no-sync python scripts/descargar_modelo.py \
     && useradd --create-home --shell /bin/bash appuser \
     && chown -R appuser:appuser /app
 
