@@ -30,6 +30,7 @@ models/
 
 # Datos crudos y temporales
 data/raw/
+data/eval_cache/
 data/interim/
 tmp/
 
