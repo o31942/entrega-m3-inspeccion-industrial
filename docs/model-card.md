@@ -58,6 +58,13 @@ Las corridas comparables registradas en `scripts/evaluar.py` documentan para nue
 * Calidad multiclase (`accuracy`, `precision_macro`, `recall_macro`, `f1_macro`, `roc_auc_ovr`).
 * Desempeño de servicio (`latency_mean_ms`, `latency_p95_ms`, `throughput_img_s`) comparando umbral de confianza y activación de CLAHE.
 
+| Run Name (`MLflow :5050`) | `apply_clahe` | `conf_threshold` | Accuracy | Macro F1 | ROC-AUC OvR | Latencia Media (ms) | Latencia P95 (ms) | Tasa Revisión HITL |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `eval-01-baseline-raw-t050` | `False` | `0.5` | `1.0000` | `1.0000` | `1.0000` | `31.08` | `37.34` | `0.00%` |
+| `eval-02-hitl-strict-t070` | `False` | `0.7` | `1.0000` | `1.0000` | `1.0000` | `31.63` | `35.69` | `0.00%` |
+| `eval-03-clahe-hitl-t070` | `True` | `0.7` | `0.9917` | `0.9917` | `1.0000` | `33.08` | `41.85` | `2.50%` |
+| `eval-04-clahe-conservative-t085` | `True` | `0.85` | `0.9917` | `0.9917` | `1.0000` | `32.80` | `39.45` | `13.33%` |
+
 ---
 
 ## 4. Limitaciones, Sesgos y Supervisión Humana (HITL)
