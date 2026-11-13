@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package inspection.v1;
+
+// Servicio gRPC principal de inspección superficial en acero laminado (NEU-DET).
+service DefectInspectionService {
+  // Verifica disponibilidad del servicio y estado del modelo cargado en memoria.
+  rpc CheckHealth (HealthRequest) returns (HealthResponse);
+
+  // Retorna metadatos del modelo MaaS y parámetros activos.
+  rpc GetModelInfo (ModelInfoRequest) returns (ModelInfoResponse);
+
+  // Ejecuta preprocesamiento, inferencia ONNX y postprocesamiento XAI sobre una imagen.
+  rpc InspectSurface (InspectRequest) returns (InspectResponse);
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  string status = 1;
+  bool model_loaded = 2;
+  string model_id = 3;
+  string model_revision = 4;
+  string runtime = 5;
+  int64 uptime_seconds = 6;
+}
+
+message ModelInfoRequest {}
+
+message ModelInfoResponse {
+  string model_id = 1;
+  string model_revision = 2;
+  string license = 3;
+  string hub_url = 4;
+  repeated string classes = 5;
+  int32 input_size = 6;
+  float default_threshold = 7;
+}
+
+message InspectRequest {
+  bytes image_bytes = 1;
+  string filename = 2;
+  string content_type = 3;
+  float conf_threshold = 4;
+  bool apply_clahe = 5;
+  string request_id = 6;
+}
+
+message ClassScore {
+  int32 class_id = 1;
+  string class_name = 2;
+  string label_es = 3;
+  float probability = 4;
+}
+
+message BoundingBox {
+  int32 x1 = 1;
+  int32 y1 = 2;
+  int32 x2 = 3;
+  int32 y2 = 4;
+}
+
+message InspectResponse {
+  string request_id = 1;
+  string predicted_class = 2;
+  string predicted_label_es = 3;
+  float confidence = 4;
+  bool requires_human_review = 5;
+  string decision_status = 6;
+  double latency_ms = 7;
+  bool applied_clahe = 8;
+  float conf_threshold = 9;
+  string model_id = 10;
+  string model_revision = 11;
+  repeated ClassScore scores = 12;
+  BoundingBox roi_bbox = 13;
+  string overlay_png_base64 = 14;
+}

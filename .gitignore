@@ -1,0 +1,52 @@
+# Entornos virtuales y caché de herramientas Python / uv
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Secretos y configuración local
+.env
+.env.*
+!.env.example
+
+# Pesos binarios MaaS y artefactos pesados de modelos (se descargan con scripts/descargar_modelo.py)
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.h5
+*.keras
+*.joblib
+*.pkl
+*.tflite
+models/
+
+# Datos crudos y temporales
+data/raw/
+data/interim/
+tmp/
+
+# Notebooks prohibidos en entrega M3
+*.ipynb
+.ipynb_checkpoints/
+
+# Base de datos y artefactos locales de MLflow
+mlflow.db
+mlflow.db-shm
+mlflow.db-wal
+mlruns/
+mlartifacts/
+artifacts/
+
+# Sistema operativo e IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
