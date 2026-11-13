@@ -24,17 +24,25 @@ def audit_repository(run_subprocesses: bool = True) -> dict[str, object]:
     ruff_ok = True
     if run_subprocesses:
         collect = subprocess.run(
-            ["uv", "run", "--offline", "pytest", "--collect-only", "-q"],
+            ["uv", "run", "--offline", "pytest", "--collect-only"],
             cwd=str(REPO_ROOT),
             text=True,
             capture_output=True,
         )
         m = re.search(r"(\d+)\s+tests?\s+collected", collect.stdout)
-        tests_collected = (
-            int(m.group(1))
-            if m
-            else len([ln for ln in collect.stdout.splitlines() if "::test_" in ln])
-        )
+        if m:
+            tests_collected = int(m.group(1))
+        else:
+            node_lines = [ln for ln in collect.stdout.splitlines() if "::" in ln]
+            if node_lines:
+                tests_collected = len(node_lines)
+            else:
+                tests_collected = sum(
+                    int(n)
+                    for n in re.findall(
+                        r"^tests/.*?:\s*(\d+)\s*$", collect.stdout, re.MULTILINE
+                    )
+                )
 
         ruff_res = subprocess.run(
             ["uv", "run", "--offline", "ruff", "check", "."],
