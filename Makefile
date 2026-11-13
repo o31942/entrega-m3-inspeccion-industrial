@@ -42,7 +42,7 @@ backend:
 	uv run python -m defect_inspector.api.run_backend
 
 frontend:
-	uv run python -m http.server 5173 --directory frontend
+	uv run python scripts/serve_frontend.py
 
 mlflow:
 	uv run mlflow server --host 127.0.0.1 --port 5050 --workers 1 --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns

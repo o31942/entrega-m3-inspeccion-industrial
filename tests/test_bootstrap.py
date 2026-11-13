@@ -26,3 +26,16 @@ def test_required_sdd_specs_and_proto_exist() -> None:
     assert (root / "docs" / "arquitectura.html").is_file()
     assert (root / "specs" / "SPEC-001-repo-gitflow" / "spec.md").is_file()
     assert (root / "specs" / "SPEC-002-proto-contract" / "spec.md").is_file()
+
+
+def test_proto_declares_all_rpcs() -> None:
+    # Arrange
+    proto_text = (
+        Path(__file__).resolve().parent.parent / "protos" / "defect_inspection.proto"
+    ).read_text(encoding="utf-8")
+
+    # Act & Assert
+    assert "service DefectInspectionService" in proto_text
+    assert "rpc CheckHealth" in proto_text
+    assert "rpc GetModelInfo" in proto_text
+    assert "rpc InspectSurface" in proto_text
