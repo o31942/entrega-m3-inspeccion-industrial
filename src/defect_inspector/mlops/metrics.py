@@ -46,6 +46,8 @@ def compute_evaluation_metrics(
         )
     except ValueError:
         auc_ovr = 0.0
+    if not np.isfinite(auc_ovr):
+        auc_ovr = 0.0
 
     lat_arr = np.asarray(latencies_ms, dtype=np.float64)
     mean_lat = float(np.mean(lat_arr))
