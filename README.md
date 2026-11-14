@@ -18,7 +18,7 @@ Servicio desacoplado de detección y clasificación multiclase de defectos super
 - **Diagrama Interactivo Archify:** [`docs/arquitectura.html`](docs/arquitectura.html) *(Architecture · Data Flow · Sequence · Lifecycle)*
 - **Model Card Oficial:** [`docs/model-card.md`](docs/model-card.md)
 - **Decisión de Arquitectura (ADR-001):** [`docs/adr-001-grpc-gateway.md`](docs/adr-001-grpc-gateway.md)
-- **Métricas Kanban & Guion Defensa:** [`docs/kanban-metricas.md`](docs/kanban-metricas.md) · [`docs/runbook-sustentacion.md`](docs/runbook-sustentacion.md)
+- **Métricas Kanban:** [`docs/kanban-metricas.md`](docs/kanban-metricas.md)
 - **Especificaciones SDD (`specs/`):** [`specs/README.md`](specs/README.md) (`42` specs completas con `spec.md`, `plan.md`, `tasks.md`)
 - **Contrato Protobuf gRPC:** [`protos/defect_inspection.proto`](protos/defect_inspection.proto)
 

@@ -1,14 +1,14 @@
-# SPEC-042 — US-42: Auditoría final pre-sustentación (3 minutos) y guion operativo de 15 min
+# SPEC-042 — US-42: Auditoría final pre-sustentación (M3) y verificación cuantitativa
 
 - **Etiqueta Kanban:** `kanban`
 - **Story Points (Fibonacci 1:1):** `2 SP`
 - **Milestone:** `M3`
 
 ## Problema y Contexto
-Antes de la sustentación del sábado 14/11 (11:30–11:45 a.m.), se debe ejecutar la prueba de 3 minutos y contar con un runbook paso a paso para los 12 minutos de demo en vivo.
+Antes de la entrega del Módulo 3, se requiere una auditoría automatizada que valide los pisos cuantitativos de especificaciones SDD, pruebas `pytest`, linter `ruff` y archivos técnicos exigidos sin depender de notas privadas dentro del repositorio.
 
 ## Requisitos Funcionales y No Funcionales
-- Crear `docs/runbook-sustentacion.md` con el guion cronometrado (0:00–15:00) y script `scripts/audit_m3.py` verificando en vivo: specs >= 40, PRs, pytest >= 120, ruff limpio y endpoints.
+- Implementar el script `scripts/audit_m3.py` para verificar de forma determinista: specs >= 40, colección `pytest` >= 120, `ruff` limpio y presencia de los entregables documentales requeridos.
 - **RNF:** Cumplir estrictamente estándares Python 3.13, `uv`, `ruff` sin advertencias y separación de 3 capas.
 
 ## Criterios de Aceptación (Given-When-Then)
