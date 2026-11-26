@@ -69,6 +69,9 @@ function bindEvents() {
   const dropzone = document.getElementById("dropzone");
   const fileInput = document.getElementById("file-input");
   const gatewayInput = document.getElementById("gateway-url");
+  if (gatewayInput) {
+    gatewayInput.value = store.getState().gatewayUrl;
+  }
   const thresholdInput = document.getElementById("conf-threshold");
   const thresholdOutput = document.getElementById("conf-threshold-value");
   const claheInput = document.getElementById("apply-clahe");

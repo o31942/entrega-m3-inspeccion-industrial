@@ -1,0 +1,19 @@
+# Plantilla Caddy Reverse Proxy con SSL/HTTPS automático (Let's Encrypt)
+# Reemplazar __PUBLIC_DOMAIN__ mediante deploy/setup_droplet.sh
+
+__PUBLIC_DOMAIN__ {
+    encode gzip zstd
+
+    request_body {
+        max_size 12MB
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    reverse_proxy 127.0.0.1:8000
+}

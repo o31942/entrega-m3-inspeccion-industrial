@@ -13,8 +13,11 @@ Servicio desacoplado de detección y clasificación multiclase de defectos super
 
 ## Enlaces Clave y Documentación Viva
 
+- **Constitución Técnica (M1–M4):** [`CONSTITUTION.md`](CONSTITUTION.md)
 - **Repositorio GitHub:** https://github.com/o31942/entrega-m3-inspeccion-industrial
-- **Tablero Kanban (GitHub Projects #4):** https://github.com/users/o31942/projects/4 *(Backlog / In Progress WIP=1 / In Review WIP=2 / Done · 42 Historias · 42 PRs fusionadas)*
+- **Pipeline GitLab CI/CD (4 etapas):** [`.gitlab-ci.yml`](.gitlab-ci.yml) (`lint` → `test` → `build_image` → `deploy_droplet`)
+- **Infraestructura Cloud & Proxy HTTPS:** [`deploy/setup_droplet.sh`](deploy/setup_droplet.sh) · [`deploy/Caddyfile`](deploy/Caddyfile)
+- **Tablero Kanban (GitHub Projects #4):** https://github.com/users/o31942/projects/4 *(Backlog / In Progress WIP=1 / In Review WIP=2 / Done · 42+ Historias · PRs fusionadas)*
 - **Diagrama Interactivo Archify:** [`docs/arquitectura.html`](docs/arquitectura.html) *(Architecture · Data Flow · Sequence · Lifecycle)*
 - **Model Card Oficial:** [`docs/model-card.md`](docs/model-card.md)
 - **Decisión de Arquitectura (ADR-001):** [`docs/adr-001-grpc-gateway.md`](docs/adr-001-grpc-gateway.md)
