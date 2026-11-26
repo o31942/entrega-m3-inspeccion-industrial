@@ -88,8 +88,9 @@ deploy_droplet:
     - if: '$CI_COMMIT_BRANCH == "main"'
   before_script:
     - apk add --no-cache openssh-client curl
-    - test -n "${DROPLET_HOST:-}" || (echo "ERROR: Falta variable CI DROPLET_HOST" && exit 1)
-    - test -n "${SSH_KEY:-}" || (echo "ERROR: Falta variable CI enmascarada SSH_KEY" && exit 1)
+    - |
+      test -n "${DROPLET_HOST:-}" || { echo "Falta variable CI DROPLET_HOST"; exit 1; }
+      test -n "${SSH_KEY:-}" || { echo "Falta variable CI enmascarada SSH_KEY"; exit 1; }
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - |
       if [ -f "$SSH_KEY" ]; then
@@ -109,7 +110,7 @@ deploy_droplet:
       ssh -i ~/.ssh/id_deploy "$DEPLOY_USER@$DROPLET_HOST" \
         "echo '$CI_REGISTRY_PASSWORD' | docker login '$CI_REGISTRY' -u '$CI_REGISTRY_USER' --password-stdin && \
          docker pull '$IMAGE_REF' && \
-         docker rm -f '$CONTAINER_NAME' || true && \
+         (docker rm -f '$CONTAINER_NAME' || true) && \
          docker run -d --name '$CONTAINER_NAME' --restart unless-stopped \
            -p 127.0.0.1:8000:8000 \
            -p 127.0.0.1:50051:50051 \

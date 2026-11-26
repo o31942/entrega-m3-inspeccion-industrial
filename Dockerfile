@@ -43,7 +43,7 @@ USER appuser
 
 EXPOSE 50051 8000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=25s --retries=3 \
+HEALTHCHECK --interval=15s --timeout=5s --start-period=15s --retries=3 \
     CMD curl -fsS http://127.0.0.1:8000/health || exit 1
 
 CMD ["python", "-m", "defect_inspector.api.run_backend"]
