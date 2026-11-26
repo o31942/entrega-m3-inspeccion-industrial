@@ -2,6 +2,8 @@ FROM python:3.13-slim
 
 COPY --from=ghcr.io/astral-sh/uv:0.13.7 /uv /uvx /bin/
 
+ARG MODEL_PACKAGE_URL=""
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
@@ -11,6 +13,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     GRPC_PORT="50051" \
     GATEWAY_HOST="0.0.0.0" \
     GATEWAY_PORT="8000" \
+    SERVE_STATIC_FRONTEND="1" \
     MAAS_MODELS_DIR="/app/models"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -28,9 +31,11 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY protos ./protos
 COPY scripts ./scripts
 COPY src ./src
+COPY frontend ./frontend
 
-RUN uv sync --frozen --no-dev \
-    && uv run --no-sync python scripts/descargar_modelo.py \
+RUN --mount=type=secret,id=ci_job_token,required=false \
+    uv sync --frozen --no-dev \
+    && MODEL_PACKAGE_URL="$MODEL_PACKAGE_URL" uv run --no-sync python scripts/descargar_modelo.py \
     && useradd --create-home --shell /bin/bash appuser \
     && chown -R appuser:appuser /app
 

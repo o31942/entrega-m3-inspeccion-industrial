@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
+import mimetypes
 import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Annotated
 
 import grpc
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from defect_inspector.api.schemas import (
     BoundingBoxSchema,
@@ -41,9 +44,42 @@ def grpc_error_to_http(exc: grpc.RpcError) -> HTTPException:
     return HTTPException(status_code=status_code, detail=detail)
 
 
-def create_gateway_app(grpc_target: str | None = None) -> FastAPI:
+DEFAULT_CORS_ORIGINS: tuple[str, ...] = (
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+    "http://127.0.0.1:4173",
+    "http://localhost:4173",
+)
+
+mimetypes.add_type("text/javascript", ".js")
+mimetypes.add_type("text/css", ".css")
+
+
+def resolve_cors_origins(extra_origins: str | None = None) -> list[str]:
+    """Combina orígenes locales de desarrollo con orígenes cloud configurados en entorno."""
+    origins: list[str] = list(DEFAULT_CORS_ORIGINS)
+    raw = extra_origins if extra_origins is not None else os.getenv("CORS_ORIGINS", "")
+    for item in raw.split(","):
+        cleaned = item.strip().rstrip("/")
+        if cleaned and cleaned not in origins:
+            origins.append(cleaned)
+    return origins
+
+
+def create_gateway_app(
+    grpc_target: str | None = None,
+    serve_static_frontend: bool | None = None,
+    frontend_dir: Path | None = None,
+) -> FastAPI:
     """Construye aplicación FastAPI actuando únicamente como proxy cliente gRPC."""
     target = grpc_target or os.getenv("GRPC_TARGET", "127.0.0.1:50051")
+    enable_static = (
+        serve_static_frontend
+        if serve_static_frontend is not None
+        else os.getenv("SERVE_STATIC_FRONTEND", "0").strip().lower()
+        in {"1", "true", "yes"}
+    )
+    static_root = frontend_dir or (Path(__file__).resolve().parents[3] / "frontend")
 
     @asynccontextmanager
     async def lifespan(app_instance: FastAPI) -> AsyncIterator[None]:
@@ -69,12 +105,7 @@ def create_gateway_app(grpc_target: str | None = None) -> FastAPI:
     )
     app_instance.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://127.0.0.1:5173",
-            "http://localhost:5173",
-            "http://127.0.0.1:4173",
-            "http://localhost:4173",
-        ],
+        allow_origins=resolve_cors_origins(),
         allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -193,6 +224,13 @@ def create_gateway_app(grpc_target: str | None = None) -> FastAPI:
                 y2=resp.roi_bbox.y2,
             ),
             overlay_png_base64=resp.overlay_png_base64,
+        )
+
+    if enable_static and static_root.is_dir():
+        app_instance.mount(
+            "/",
+            StaticFiles(directory=str(static_root), html=True),
+            name="frontend",
         )
 
     return app_instance
