@@ -7,10 +7,25 @@ export const UI_STATES = Object.freeze({
   ERROR: "error",
 });
 
+export function resolveDefaultGatewayUrl() {
+  if (
+    typeof window !== "undefined" &&
+    window.location &&
+    typeof window.location.protocol === "string" &&
+    window.location.protocol.startsWith("http")
+  ) {
+    const port = String(window.location.port || "");
+    if (port !== "5173" && port !== "4173") {
+      return window.location.origin;
+    }
+  }
+  return "http://127.0.0.1:8000";
+}
+
 export function createStore() {
   let state = {
     status: UI_STATES.IDLE,
-    gatewayUrl: "http://127.0.0.1:8000",
+    gatewayUrl: resolveDefaultGatewayUrl(),
     health: null,
     modelInfo: null,
     selectedFile: null,

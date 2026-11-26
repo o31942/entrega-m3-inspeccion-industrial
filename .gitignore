@@ -11,10 +11,16 @@ dist/
 build/
 *.egg-info/
 
-# Secretos y configuración local
+# Secretos, llaves SSH y configuración local
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+id_ed25519*
+id_rsa*
+coverage.xml
+report.xml
 
 # Pesos binarios MaaS y artefactos pesados de modelos (se descargan con scripts/descargar_modelo.py)
 *.pt

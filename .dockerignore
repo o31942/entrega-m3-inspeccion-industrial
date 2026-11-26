@@ -12,5 +12,5 @@ models/
 data/
 docs/*.pdf
 specs/
-frontend/
+deploy/
 tests/
